@@ -1,16 +1,13 @@
-name: 打包快门诊断器 (Win + Linux + macOS)
+name: 打包快门诊断器 (Win + macOS + Linux)
 
 on:
-  push:
-    tags:
-      - 'v*'
-  workflow_dispatch:   # 允许手动触发
+  workflow_dispatch:
 
 jobs:
   build:
     strategy:
       matrix:
-        os: [windows-latest, ubuntu-latest, macos-latest]
+        os: [windows-latest, macos-latest, ubuntu-latest]
 
     runs-on: ${{ matrix.os }}
 
@@ -28,26 +25,30 @@ jobs:
           python -m pip install --upgrade pip
           pip install pyinstaller pyserial matplotlib numpy pillow
 
-      - name: 打包程序
+      - name: 打包 Simple 版本
         run: |
-          pyinstaller --onefile \
-                      --windowed \
-                      --name "快门测量诊断器" \
+          pyinstaller --onefile --windowed \
+                      --name "快门测量诊断器_Simple" \
                       --clean \
-                      main.py
+                      shutter_measurement_simple.py
+
+      - name: 打包 Complex 版本
+        run: |
+          pyinstaller --onefile --windowed \
+                      --name "快门测量诊断器_Complex" \
+                      --clean \
+                      shutter_measurement_complex.py
 
       - name: 整理打包文件
         run: |
           mkdir -p release
           if [ "${{ matrix.os }}" == "windows-latest" ]; then
-            cp dist/快门测量诊断器.exe release/
-          elif [ "${{ matrix.os }}" == "macos-latest" ]; then
-            cp dist/快门测量诊断器 release/
+            cp dist/*.exe release/ 2>/dev/null || echo "No exe found"
           else
-            cp dist/快门测量诊断器 release/
+            cp dist/快门测量诊断器_* release/ 2>/dev/null || echo "No binary found"
           fi
 
-      - name: 上传产物
+      - name: 上传打包结果
         uses: actions/upload-artifact@v4
         with:
           name: 快门测量诊断器-${{ matrix.os }}
