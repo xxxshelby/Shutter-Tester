@@ -26,24 +26,16 @@ jobs:
           pip install pyinstaller pyserial matplotlib numpy pillow
 
       - name: 打包 Simple 版本
-        run: |
-          pyinstaller --onefile --windowed \
-                      --name "快门测量诊断器_Simple" \
-                      --clean \
-                      shutter_measurement_simple.py
+        run: pyinstaller --onefile --windowed --name "快门测量诊断器_Simple" --clean shutter_measurement_simple.py
 
       - name: 打包 Complex 版本
-        run: |
-          pyinstaller --onefile --windowed \
-                      --name "快门测量诊断器_Complex" \
-                      --clean \
-                      shutter_measurement_complex.py
+        run: pyinstaller --onefile --windowed --name "快门测量诊断器_Complex" --clean shutter_measurement_complex.py
 
       - name: 整理打包文件
         run: |
           mkdir -p release
           if [ "${{ matrix.os }}" == "windows-latest" ]; then
-            cp dist/*.exe release/ 2>/dev/null || echo "No exe found"
+            cp dist/*.exe release/ 2>/dev/null || echo "No Windows exe found"
           else
             cp dist/快门测量诊断器_* release/ 2>/dev/null || echo "No binary found"
           fi
